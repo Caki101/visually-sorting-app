@@ -116,6 +116,7 @@ public class ChoiceScreen extends JFrame {
                         BubbleSort();
                         break;
                     case "Insertion Sort":
+                        InsertionSort();
                         break;
                 }
             }
@@ -312,6 +313,58 @@ public class ChoiceScreen extends JFrame {
                                 return;
                             }
                         }
+                    }
+                }
+                start_btn.setEnabled(true);
+                array_size_tf.setEnabled(true);
+            }
+        };
+        sorting_thread.start();
+    }
+
+    public void InsertionSort(){
+        sorting_thread = new Thread(){
+            public void run(){
+                try {
+                    worker_thread.join();
+                } catch (InterruptedException e) {
+                    System.out.println("Join interrupted.");
+                    worker_thread.interrupt();
+                    FillArray();
+                    RepaintBottomPanel();
+                    return;
+                }
+                System.out.println("Start Sorting");
+
+                // START SORTING
+                int j;
+                for(int i = 1;i<array.size();i++){
+                    int ce = array.get(i);
+                    j = i-1;
+                    while(j >= 0 && array.get(j) > ce){
+                        array.set(j+1,array.get(j));
+                        j--;
+
+                        RepaintBottomPanel();
+                        try {
+                            Thread.sleep(speeds[speed_slider.getValue()-1]);
+                        } catch (InterruptedException e) {
+                            System.out.println("Sorting thread interrupted");
+                            FillArray();
+                            RepaintBottomPanel();
+                            return;
+                        }
+                    }
+                    array.set(j+1,ce);
+
+                    RepaintBottomPanel();
+                    try {
+                        Thread.sleep(speeds[speed_slider.getValue()-1]);
+                    } catch (InterruptedException e) {
+                        System.out.println("Sorting thread interrupted");
+                        FillArray();
+                        RepaintBottomPanel();
+                        return;
                     }
                 }
                 start_btn.setEnabled(true);
