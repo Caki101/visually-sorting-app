@@ -68,7 +68,7 @@ public class ChoiceScreen extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 try{
-                    int n = Integer.parseInt(array_size_tf.getText());
+                    Integer.parseInt(array_size_tf.getText());
                     array_size_error.setVisible(false);
                     start_btn.setEnabled(true);
 
@@ -111,9 +111,9 @@ public class ChoiceScreen extends JFrame {
                 switch (algorithms_cb.getSelectedItem().toString()){
                     case "Selection Sort":
                         SelectionSort();
-                        System.out.println("lets go");
                         break;
                     case "Bubble Sort":
+                        BubbleSort();
                         break;
                     case "Insertion Sort":
                         break;
@@ -260,6 +260,47 @@ public class ChoiceScreen extends JFrame {
                             int t = array.get(i);
                             array.set(i,array.get(j));
                             array.set(j,t);
+
+                            RepaintBottomPanel();
+                            try {
+                                Thread.sleep(speeds[speed_slider.getValue()-1]);
+                            } catch (InterruptedException e) {
+                                System.out.println("Sorting thread interrupted");
+                                FillArray();
+                                RepaintBottomPanel();
+                                return;
+                            }
+                        }
+                    }
+                }
+                start_btn.setEnabled(true);
+                array_size_tf.setEnabled(true);
+            }
+        };
+        sorting_thread.start();
+    }
+
+    public void BubbleSort(){
+        sorting_thread = new Thread(){
+            public void run(){
+                try {
+                    worker_thread.join();
+                } catch (InterruptedException e) {
+                    System.out.println("Join interrupted.");
+                    worker_thread.interrupt();
+                    FillArray();
+                    RepaintBottomPanel();
+                    return;
+                }
+                System.out.println("Start Sorting");
+
+                // START SORTING
+                for(int i = 0;i<array.size();i++){
+                    for(int j = 0;j<array.size() - 1 - i;j++){
+                        if(array.get(j) > array.get(j+1)){
+                            int t = array.get(j);
+                            array.set(j,array.get(j+1));
+                            array.set(j+1,t);
 
                             RepaintBottomPanel();
                             try {
