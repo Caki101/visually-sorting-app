@@ -53,6 +53,7 @@ public class ChoiceScreen extends JFrame {
         algorithms_cb.addItem("Bubble Sort");
         algorithms_cb.addItem("Insertion Sort");
         algorithms_cb.addItem("Merge Sort");
+        algorithms_cb.addItem("Quick Sort");
         algorithm_choice_panel.add(algorithms_cb);
 
         JPanel array_size_panel = new JPanel(new GridLayout(2,1));
@@ -121,6 +122,9 @@ public class ChoiceScreen extends JFrame {
                         break;
                     case "Merge Sort":
                         MergeSort();
+                        break;
+                    case "Quick Sort":
+                        QuickSort();
                         break;
                 }
             }
@@ -503,7 +507,75 @@ public class ChoiceScreen extends JFrame {
     }
 
     public void QuickSort(){
+        sorting_thread = new Thread(){
+            public void run(){
+                try {
+                    worker_thread.join();
+                } catch (InterruptedException e) {
+                    System.out.println("Join interrupted.");
+                    worker_thread.interrupt();
+                    FillArray();
+                    RepaintBottomPanel();
+                    return;
+                }
+                System.out.println("Start Sorting");
 
+                // START SORTING
+                sort(0,array.size()-1);
+
+                start_btn.setEnabled(true);
+                array_size_tf.setEnabled(true);
+            }
+
+            private void sort(int l, int r){
+                int pivotI = r;
+                int smallI = -1;
+
+                if(l == r || l == -1 || r == -1) return;
+
+                for (int i = l; i < r; i++) {
+                    if(array.get(i) < array.get(r) ){
+                        int t = array.get(smallI+1);
+                        array.set(smallI+1,array.get(i));
+                        array.set(i,t);
+                        smallI++;
+
+                        // REPAINT
+                        RepaintBottomPanel();
+                        try {
+                            Thread.sleep(speeds[speed_slider.getValue()-1]);
+                        } catch (InterruptedException e) {
+                            System.out.println("Sorting thread interrupted");
+                            FillArray();
+                            RepaintBottomPanel();
+                            interrupt();
+                            return;
+                        }
+                    }
+                }
+                pivotI = smallI+1;
+
+                int t = array.get(pivotI);
+                array.set(pivotI,array.get(r));
+                array.set(r,t);
+
+                // REPAINT
+                RepaintBottomPanel();
+                try {
+                    Thread.sleep(speeds[speed_slider.getValue()-1]);
+                } catch (InterruptedException e) {
+                    System.out.println("Sorting thread interrupted");
+                    FillArray();
+                    RepaintBottomPanel();
+                    interrupt();
+                    return;
+                }
+
+                sort(l,pivotI-1);
+                sort(pivotI+1,r);
+            }
+        };
+        sorting_thread.start();
     }
 
     public void HeapSort(){
