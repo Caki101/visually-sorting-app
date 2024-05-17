@@ -52,6 +52,7 @@ public class ChoiceScreen extends JFrame {
         algorithms_cb.addItem("Selection Sort");
         algorithms_cb.addItem("Bubble Sort");
         algorithms_cb.addItem("Insertion Sort");
+        algorithms_cb.addItem("Merge Sort");
         algorithm_choice_panel.add(algorithms_cb);
 
         JPanel array_size_panel = new JPanel(new GridLayout(2,1));
@@ -118,6 +119,9 @@ public class ChoiceScreen extends JFrame {
                     case "Insertion Sort":
                         InsertionSort();
                         break;
+                    case "Merge Sort":
+                        MergeSort();
+                        break;
                 }
             }
         });
@@ -183,6 +187,7 @@ public class ChoiceScreen extends JFrame {
         general.remove(lower_panel);
         lower_panel = new JPanel(new GridLayout(1,array.size()));
         lower_panel.setBackground(Color.BLACK);
+        System.out.println((window_width/array.size())+100);
 
         // painting visually array
         for(int i = 0;i<array.size();i++){
@@ -191,7 +196,7 @@ public class ChoiceScreen extends JFrame {
                 @Override
                 public void paint(Graphics g) {
                     g.setColor(Color.WHITE);
-                    g.fillRect(0,(int) (((window_height)/2-30)*((float)(array.size()-array.get(i2))/array.size()))+5,window_width/array.size(), (int) (((window_height)/2-30)*((float)array.get(i2)/array.size()))); // 5,5,-10,-30
+                    g.fillRect(1,(int) (((window_height)/2-30)*((float)(array.size()-array.get(i2))/array.size()))+5,window_width/array.size()+10, (int) (((window_height)/2-30)*((float)array.get(i2)/array.size()))); // 5,5,-10,-30
                     // array.size()<20?5:array.size()<50?4:array.size()<100?3:2
                     // (array.size()<20?10:array.size()<50?8:array.size()<100?6:4)
                 }
@@ -262,6 +267,7 @@ public class ChoiceScreen extends JFrame {
                             array.set(i,array.get(j));
                             array.set(j,t);
 
+                            // REPAINT
                             RepaintBottomPanel();
                             try {
                                 Thread.sleep(speeds[speed_slider.getValue()-1]);
@@ -303,6 +309,7 @@ public class ChoiceScreen extends JFrame {
                             array.set(j,array.get(j+1));
                             array.set(j+1,t);
 
+                            // REPAINT
                             RepaintBottomPanel();
                             try {
                                 Thread.sleep(speeds[speed_slider.getValue()-1]);
@@ -345,6 +352,7 @@ public class ChoiceScreen extends JFrame {
                         array.set(j+1,array.get(j));
                         j--;
 
+                        // REPAINT
                         RepaintBottomPanel();
                         try {
                             Thread.sleep(speeds[speed_slider.getValue()-1]);
@@ -357,6 +365,7 @@ public class ChoiceScreen extends JFrame {
                     }
                     array.set(j+1,ce);
 
+                    // REPAINT
                     RepaintBottomPanel();
                     try {
                         Thread.sleep(speeds[speed_slider.getValue()-1]);
@@ -373,4 +382,175 @@ public class ChoiceScreen extends JFrame {
         };
         sorting_thread.start();
     }
+
+    public void MergeSort(){
+        sorting_thread = new Thread(){
+            public void run(){
+                try {
+                    worker_thread.join();
+                } catch (InterruptedException e) {
+                    System.out.println("Join interrupted.");
+                    worker_thread.interrupt();
+                    FillArray();
+                    RepaintBottomPanel();
+                    return;
+                }
+                System.out.println("Start Sorting");
+
+                // START SORTING
+                sort(0,array.size()-1);
+
+                start_btn.setEnabled(true);
+                array_size_tf.setEnabled(true);
+            }
+            private void sort(int l, int r){
+                if(l < r){
+                    int m = l + (r - l) / 2;
+
+                    sort(l,m);
+                    sort(m+1,r);
+
+                    merge(l,m,r);
+                }
+            }
+            private void merge(int l, int m, int r){
+                int n1 = m - l + 1;
+                int n2 = r - m;
+
+                int[] L = new int[n1];
+                int[] R = new int[n2];
+
+                for (int i = 0; i < n1; i++) {
+                    L[i] = array.get(i + l);
+                }
+
+                for (int j = 0; j < n2; j++) {
+                    R[j] = array.get(j + m + 1);
+                }
+                
+                int i = 0; int j = 0; int k = l;
+
+                while (i < n1 && j < n2){
+                    if(L[i] < R[j]){
+                        array.set(k,L[i]);
+                        i++;
+
+                        // REPAINT
+                        RepaintBottomPanel();
+                        try {
+                            Thread.sleep(speeds[speed_slider.getValue()-1]);
+                        } catch (InterruptedException e) {
+                            System.out.println("Sorting thread interrupted");
+                            FillArray();
+                            RepaintBottomPanel();
+                            return;
+                        }
+                    }
+                    else{
+                        array.set(k,R[j]);
+                        j++;
+
+                        // REPAINT
+                        RepaintBottomPanel();
+                        try {
+                            Thread.sleep(speeds[speed_slider.getValue()-1]);
+                        } catch (InterruptedException e) {
+                            System.out.println("Sorting thread interrupted");
+                            FillArray();
+                            RepaintBottomPanel();
+                            return;
+                        }
+                    }
+                    k++;
+                }
+
+                while(i < n1){
+                    array.set(k,L[i]);
+                    i++;
+                    k++;
+
+                    // REPAINT
+                    RepaintBottomPanel();
+                    try {
+                        Thread.sleep(speeds[speed_slider.getValue()-1]);
+                    } catch (InterruptedException e) {
+                        System.out.println("Sorting thread interrupted");
+                        FillArray();
+                        RepaintBottomPanel();
+                        return;
+                    }
+                }
+
+                while(j < n2){
+                    array.set(k,R[j]);
+                    j++;
+                    k++;
+
+                    // REPAINT
+                    RepaintBottomPanel();
+                    try {
+                        Thread.sleep(speeds[speed_slider.getValue()-1]);
+                    } catch (InterruptedException e) {
+                        System.out.println("Sorting thread interrupted");
+                        FillArray();
+                        RepaintBottomPanel();
+                        return;
+                    }
+                }
+            }
+        };
+        sorting_thread.start();
+    }
+
+    public void QuickSort(){
+
+    }
+
+    public void HeapSort(){
+
+    }
+
+    public void CountingSort(){
+
+    }
+
+    public void RadixSort(){
+
+    }
+
+    public void BucketSort(){}
+
+    public void BingoSort(){}
+
+    public void ShellSort(){}
+
+    public void TimSort(){}
+
+    public void CombSort(){}
+
+    public void PigeonholeSort(){}
+
+    public void CycleSort(){}
+
+    public void CoctailSort(){}
+
+    public void StrandSort(){}
+
+    public void BitonicSort(){}
+
+    public void PancakeSort(){}
+
+    public void PermutationSort(){}
+
+    public void GnomeSort(){}
+
+    public void SleepSort(){}
+
+    public void StoogeSort(){}
+
+    public void TreeSort(){}
+
+    public void BrickSort(){}
+
+    public void ThreeWayMergeSort(){}
 }
